@@ -148,6 +148,7 @@ interface State {
   dialog?: DialogProps | null
   layout: PageConfig.Layout
   initialSidebarState: PageConfig.SidebarState
+  showPageNavigation: boolean
   menuItems?: PageConfig.IMenuItems | null
   allowRunOnSave: boolean
   scriptFinishedHandlers: (() => void)[]
@@ -253,6 +254,7 @@ export class App extends PureComponent<Props, State> {
       },
       layout: PageConfig.Layout.CENTERED,
       initialSidebarState: PageConfig.SidebarState.AUTO,
+      showPageNavigation: true,
       menuItems: undefined,
       allowRunOnSave: true,
       scriptFinishedHandlers: [],
@@ -631,8 +633,14 @@ export class App extends PureComponent<Props, State> {
   }
 
   handlePageConfigChanged = (pageConfig: PageConfig): void => {
-    const { title, favicon, layout, initialSidebarState, menuItems } =
-      pageConfig
+    const {
+      title,
+      favicon,
+      layout,
+      initialSidebarState,
+      menuItems,
+      showPageNavigation,
+    } = pageConfig
 
     if (title) {
       this.hostCommunicationMgr.sendMessageToHost({
@@ -669,6 +677,12 @@ export class App extends PureComponent<Props, State> {
     }
 
     this.setState({ menuItems })
+
+    if (showPageNavigation !== this.state.showPageNavigation) {
+      this.setState(() => ({
+        showPageNavigation,
+      }))
+    }
   }
 
   handlePageInfoChanged = (pageInfo: PageInfo): void => {
@@ -1604,6 +1618,7 @@ export class App extends PureComponent<Props, State> {
       dialog,
       elements,
       initialSidebarState,
+      showPageNavigation,
       menuItems,
       isFullScreen,
       scriptRunId,
@@ -1744,7 +1759,9 @@ export class App extends PureComponent<Props, State> {
                 appPages={this.state.appPages}
                 onPageChange={this.onPageChange}
                 currentPageScriptHash={currentPageScriptHash}
-                hideSidebarNav={hideSidebarNav || hostHideSidebarNav}
+                hideSidebarNav={
+                  hideSidebarNav || hostHideSidebarNav || !showPageNavigation
+                }
               />
               {renderedDialog}
             </StyledApp>
